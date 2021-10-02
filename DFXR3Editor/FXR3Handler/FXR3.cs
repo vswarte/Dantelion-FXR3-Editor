@@ -231,6 +231,7 @@ namespace FXR3_XMLR
         public class FFXStateMachine
         {
             public List<FXR3.FFXState> States { get; set; }
+            public int Pointer { get; set; }
 
             public FFXStateMachine() => this.States = new List<FXR3.FFXState>();
 
@@ -238,9 +239,9 @@ namespace FXR3_XMLR
             {
                 br.AssertInt32(new int[1]);
                 int capacity = br.ReadInt32();
-                int num = br.ReadInt32();
-                br.AssertInt32(new int[1]);
-                br.StepIn((long)num);
+                int num = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer = br.ReadInt32();
+                br.StepIn(num);
                 this.States = new List<FXR3.FFXState>(capacity);
                 for (int index = 0; index < capacity; ++index)
                     this.States.Add(new FXR3.FFXState(br));
@@ -266,6 +267,7 @@ namespace FXR3_XMLR
         public class FFXState
         {
             public List<FXR3.FFXTransition> Transitions { get; set; }
+            public int Pointer { get; set; }
 
             public FFXState() => this.Transitions = new List<FXR3.FFXTransition>();
 
@@ -273,9 +275,9 @@ namespace FXR3_XMLR
             {
                 br.AssertInt32(new int[1]);
                 int capacity = br.ReadInt32();
-                int num = br.ReadInt32();
-                br.AssertInt32(new int[1]);
-                br.StepIn((long)num);
+                int num = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer = br.ReadInt32();
+                br.StepIn(num);
                 this.Transitions = new List<FXR3.FFXTransition>(capacity);
                 for (int index = 0; index < capacity; ++index)
                     this.Transitions.Add(new FXR3.FFXTransition(br));
@@ -306,6 +308,9 @@ namespace FXR3_XMLR
             [XmlAttribute]
             public int TargetStateIndex { get; set; }
 
+            public int Pointer1 { get; set; }
+            public int Pointer2 { get; set; }
+
             public int Unk10 { get; set; }
 
             public int Unk38 { get; set; }
@@ -330,8 +335,9 @@ namespace FXR3_XMLR
                 br.AssertInt32(new int[1]);
                 br.AssertInt32(1);
                 br.AssertInt32(new int[1]);
-                int num4 = br.ReadInt32();
-                br.AssertInt32(new int[1]);
+                int num4 = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer1 = br.ReadInt32();
+                br.AssertInt16(new short[1]);
                 br.AssertInt32(new int[1]);
                 br.AssertInt32(new int[1]);
                 br.AssertInt32(new int[1]);
@@ -340,8 +346,9 @@ namespace FXR3_XMLR
                 br.AssertInt32(new int[1]);
                 br.AssertInt32(1);
                 br.AssertInt32(new int[1]);
-                int num5 = br.ReadInt32();
-                br.AssertInt32(new int[1]);
+                int num5 = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer2 = br.ReadInt32();
+                br.AssertInt16(new short[1]);
                 br.AssertInt32(new int[1]);
                 br.AssertInt32(new int[1]);
                 br.AssertInt32(new int[1]);
@@ -397,6 +404,10 @@ namespace FXR3_XMLR
             [XmlAttribute]
             public short EffectID { get; set; }
 
+            public int Pointer1 { get; set; }
+            public int Pointer2 { get; set; }
+            public int Pointer3 { get; set; }
+
             public List<FXR3.FFXEffectCallA> EffectAs { get; set; }
 
             public List<FXR3.FFXEffectCallB> EffectBs { get; set; }
@@ -420,12 +431,15 @@ namespace FXR3_XMLR
                 int capacity2 = br.ReadInt32();
                 int capacity3 = br.ReadInt32();
                 br.AssertInt32(new int[1]);
-                int num3 = br.ReadInt32();
-                br.AssertInt32(new int[1]);
-                int num4 = br.ReadInt32();
-                br.AssertInt32(new int[1]);
-                int num5 = br.ReadInt32();
-                br.AssertInt32(new int[1]);
+                int num3 = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer1 = br.ReadInt32();
+                br.AssertInt16(new short[1]);
+                int num4 = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer2 = br.ReadInt32();
+                br.AssertInt16(new short[1]);
+                int num5 = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer3 = br.ReadInt32();
+                br.AssertInt16(new short[1]);
                 br.StepIn((long)num5);
                 this.EffectAs = new List<FXR3.FFXEffectCallA>(capacity3);
                 for (int index = 0; index < capacity3; ++index)
@@ -515,6 +529,8 @@ namespace FXR3_XMLR
             [XmlAttribute]
             public short EffectID { get; set; }
 
+            public int Pointer { get; set; }
+
             public List<FXR3.FFXActionCall> Actions { get; set; }
 
             public FFXEffectCallB() => this.Actions = new List<FXR3.FFXActionCall>();
@@ -529,8 +545,9 @@ namespace FXR3_XMLR
                 int capacity = br.ReadInt32();
                 br.AssertInt32(new int[1]);
                 br.AssertInt32(new int[1]);
-                int num3 = br.ReadInt32();
-                br.AssertInt32(new int[1]);
+                int num3 = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer = br.ReadInt32();
+                br.AssertInt16(new short[1]);
                 br.StepIn((long)num3);
                 this.Actions = new List<FXR3.FFXActionCall>(capacity);
                 for (int index = 0; index < capacity; ++index)
@@ -567,6 +584,10 @@ namespace FXR3_XMLR
         {
             [XmlAttribute]
             public short ActionID { get; set; }
+
+            public int Pointer1 { get; set; }
+            public int Pointer2 { get; set; }
+            public int Pointer3 { get; set; }
 
             public bool Unk02 { get; set; }
 
@@ -605,12 +626,15 @@ namespace FXR3_XMLR
                 int count2 = br.ReadInt32();
                 br.AssertInt32(new int[1]);
                 int capacity3 = br.ReadInt32();
-                int num1 = br.ReadInt32();
-                br.AssertInt32(new int[1]);
-                int num2 = br.ReadInt32();
-                br.AssertInt32(new int[1]);
-                int num3 = br.ReadInt32();
-                br.AssertInt32(new int[1]);
+                int num1 = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer1 = br.ReadInt32();
+                br.AssertInt16(new short[1]);
+                int num2 = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer2 = br.ReadInt32();
+                br.AssertInt16(new short[1]);
+                int num3 = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer3 = br.ReadInt32();
+                br.AssertInt16(new short[1]);
                 br.AssertInt32(new int[1]);
                 br.AssertInt32(new int[1]);
                 br.StepIn((long)num3);
@@ -762,6 +786,9 @@ namespace FXR3_XMLR
 
             public List<FXR3.FFXField> Fields { get; set; }
 
+            public int Pointer1 { get; set; }
+            public int Pointer2 { get; set; }
+
             public FFXProperty()
             {
                 this.Section8s = new List<FXR3.Section8>();
@@ -776,10 +803,12 @@ namespace FXR3_XMLR
                 this.TypeEnumB = br.ReadInt32();
                 int count = br.ReadInt32();
                 br.AssertInt32(new int[1]);
-                int offset = br.ReadInt32();
-                br.AssertInt32(new int[1]);
-                int num3 = br.ReadInt32();
-                br.AssertInt32(new int[1]);
+                int offset = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer1 = br.ReadInt32();
+                br.AssertInt16(new short[1]);
+                int num3 = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer2 = br.ReadInt32();
+                br.AssertInt16(new short[1]);
                 int capacity = br.ReadInt32();
                 br.AssertInt32(new int[1]);
                 br.StepIn((long)num3);
@@ -843,6 +872,9 @@ namespace FXR3_XMLR
 
             public List<FXR3.FFXField> Fields { get; set; }
 
+            public int Pointer1 { get; set; }
+            public int Pointer2 { get; set; }
+
             public Section8()
             {
                 this.Section9s = new List<FXR3.Section9>();
@@ -857,10 +889,12 @@ namespace FXR3_XMLR
                 this.Unk04 = br.ReadInt32();
                 int count = br.ReadInt32();
                 int capacity = br.ReadInt32();
-                int offset = br.ReadInt32();
-                br.AssertInt32(new int[1]);
-                int num3 = br.ReadInt32();
-                br.AssertInt32(new int[1]);
+                int offset = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer1 = br.ReadInt32();
+                br.AssertInt16(new short[1]);
+                int num3 = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer2 = br.ReadInt32();
+                br.AssertInt16(new short[1]);
                 br.StepIn((long)num3);
                 this.Section9s = new List<FXR3.Section9>(capacity);
                 for (int index = 0; index < capacity; ++index)
@@ -948,13 +982,16 @@ namespace FXR3_XMLR
         public class Section10
         {
             public List<FXR3.FFXField> Fields { get; set; }
+            
+            public int Pointer { get; set; }
 
             public Section10() => this.Fields = new List<FXR3.FFXField>();
 
             internal Section10(BinaryReaderEx br)
             {
-                int offset = br.ReadInt32();
-                br.AssertInt32(new int[1]);
+                int offset = OffsetFixer.Apply(br.ReadInt16());
+                this.Pointer = br.ReadInt32();
+                br.AssertInt16(new short[1]);
                 int count = br.ReadInt32();
                 br.AssertInt32(new int[1]);
                 this.Fields = FXR3.FFXField.ReadManyAt(br, offset, count);
@@ -999,6 +1036,13 @@ namespace FXR3_XMLR
             }
 
             return XDoc;
+        }
+    }
+
+    internal static class OffsetFixer
+    {
+        public static int Apply(int input) {
+            return input > 0x5500 ? input - 0x5500 : input;
         }
     }
 }

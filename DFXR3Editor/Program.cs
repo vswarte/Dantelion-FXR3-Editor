@@ -337,7 +337,10 @@ namespace DFXR3Editor
                 {
                     if (ImGui.MenuItem("Experimental Meme Reload Lol", selectedFFXWindow != null))
                     {
-                        FFXReloader.Reload(selectedFFXWindow.loadTimeFxr3.Write(), FXR3_XMLR.FXR3EnhancedSerialization.XMLToFXR3(selectedFFXWindow.xDocLinq).Write());
+                        var newContent = FXR3_XMLR.FXR3EnhancedSerialization.XMLToFXR3(selectedFFXWindow.xDocLinq)
+                            .Write();
+                        FFXReloader.Reload(selectedFFXWindow.currentMemoryVersion, newContent);
+                        selectedFFXWindow.currentMemoryVersion = newContent;
                     }
                     ImGui.EndMenu();
                 }

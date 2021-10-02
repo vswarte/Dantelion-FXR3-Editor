@@ -20,6 +20,7 @@ namespace DFXR3Editor.Dependencies
         {
             xDocLinq = xdoc;
             _loadedFilePath = loadedFilePath;
+            currentMemoryVersion = loadTimeFxr3.Write();
             this.loadTimeFxr3 = loadTimeFxr3;
         }
 
@@ -80,6 +81,8 @@ namespace DFXR3Editor.Dependencies
         // Save/Load Path
         public string _loadedFilePath = "";
         public FXR3 loadTimeFxr3;
+
+        public byte[] currentMemoryVersion;
 
         public ActionManager actionManager = new ActionManager();
         public bool collapseExpandTreeView = false;

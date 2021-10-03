@@ -29,48 +29,68 @@ namespace FFXPatchTest {
             return ffxPtr;
         }
 
-        public static async Task Reload(Process process, IntPtr ffxPtr, byte[] originalFxrByteArray, byte[] changedFxrByteArray) {
-            var originalFxr = originalFxrByteArray;
-            var patchedFxr = changedFxrByteArray;
-
-            // Sanity checks
-            if (originalFxr.Length != patchedFxr.Length) {
-                throw new NotImplementedException("Bad human! No changing file sizes!");
+        public static IntPtr FindTablePointer(Process process, IntPtr ffxPtr) {
+            // Find the reference to this in-memory FXR file
+            var pointerBytes = BitConverter.GetBytes(ffxPtr.ToInt64());
+            var tableScanner = new MemoryScanner(process, new IntPtr(0x7FF432407280), 0xfffffff);
+            var ffxTablePtr = tableScanner.FindPattern(pointerBytes, "xxxxxxxx");
+            if (ffxTablePtr == IntPtr.Zero) {
+                throw new Exception("Could not find FFX table pointer AOB");
             }
-
-            await File.WriteAllBytesAsync("in-memory.fxr", debugDumpFxr(process.Handle, ffxPtr));
-            await File.WriteAllBytesAsync("patched.fxr", patchedFxr);
-
-            writeBytes(process.Handle, ffxPtr, patchedFxr);
+            return ffxTablePtr;
         }
 
-        private static byte[] debugDumpFxr(IntPtr process, IntPtr ffxPtr) {
-            // Grab the end of the in-memory FFX file
-            // In memory, the 8 bytes preceeding the actual FXR seems to indicate the end of the FXR file
-            var ffxEndPtr = readPointer(process, ffxPtr - 8);
-            var inMemoryFxrLength = (long) ffxEndPtr - (long) ffxPtr;
-            var memoryFxrContents = readBytes(process, ffxPtr, inMemoryFxrLength);
-            return memoryFxrContents;
+        public static void SwapPointers(IntPtr process, IntPtr dest, IntPtr replacement) {
+            WriteBytes(process, dest, BitConverter.GetBytes(replacement.ToInt64()));
         }
 
-        private static IntPtr readPointer(IntPtr process, IntPtr ptr) {
-            return new IntPtr(BitConverter.ToInt64(readBytes(process, ptr, 8)));
-        }
+        // public static async Task Reload(IntPtr process, IntPtr ffxPtr, byte[] originalFxrByteArray, byte[] changedFxrByteArray) {
+        //     var originalFxr = originalFxrByteArray;
+        //     var patchedFxr = changedFxrByteArray;
+        //
+        //     // Sanity checks
+        //     if (originalFxr.Length != patchedFxr.Length) {
+        //         throw new NotImplementedException("Bad human! No changing file sizes!");
+        //     }
+        //
+        //     await File.WriteAllBytesAsync("in-memory.fxr", debugDumpFxr(process, ffxPtr));
+        //     await File.WriteAllBytesAsync("patched.fxr", patchedFxr);
+        //
+        //     writeBytes(process, ffxPtr, patchedFxr);
+        // }
 
-        private static byte[] readBytes(IntPtr process, IntPtr ptr, long length) {
-            var bytesRead = 0;
-            var buffer = new byte[length];
-            var success = Kernel32.ReadProcessMemory(process, ptr, buffer, buffer.Length, ref bytesRead);
-            if (!success || bytesRead != buffer.Length) {
-                throw new Exception("Could not read pointer");
-            }
-            return buffer;
-        }
+        // private static byte[] debugDumpFxr(IntPtr process, IntPtr ffxPtr) {
+        //     // Grab the end of the in-memory FFX file
+        //     // In memory, the 8 bytes preceeding the actual FXR seems to indicate the end of the FXR file
+        //     var ffxEndPtr = readPointer(process, ffxPtr - 8);
+        //     var inMemoryFxrLength = (long) ffxEndPtr - (long) ffxPtr;
+        //     var memoryFxrContents = readBytes(process, ffxPtr, inMemoryFxrLength);
+        //     return memoryFxrContents;
+        // }
 
-        private static void writeBytes(IntPtr process, IntPtr ptr, byte[] buffer) {
-            //Kernel32.VirtualProtectEx(process, ptr, (uint) buffer.Length, Kernel32.Protection.PAGE_EXECUTE_READWRITE, out var oldProtection);
+        // private static IntPtr readPointer(IntPtr process, IntPtr ptr) {
+        //     return new IntPtr(BitConverter.ToInt64(readBytes(process, ptr, 8)));
+        // }
+
+        // private static byte[] readBytes(IntPtr process, IntPtr ptr, long length) {
+        //     var bytesRead = 0;
+        //     var buffer = new byte[length];
+        //     var success = Kernel32.ReadProcessMemory(process, ptr, buffer, buffer.Length, ref bytesRead);
+        //     if (!success || bytesRead != buffer.Length) {
+        //         throw new Exception("Could not read pointer");
+        //     }
+        //     return buffer;
+        // }
+
+        public static void WriteBytes(IntPtr process, IntPtr ptr, byte[] buffer) {
             Kernel32.WriteProcessMemory(process, ptr, buffer, (int) buffer.Length, out var numWrite);
-            //Kernel32.VirtualProtectEx(process, ptr, (uint) buffer.Length, oldProtection, out var _);
+            if (numWrite != buffer.Length) {
+                throw new Exception("Couldn't write bytes");
+            }
+        }
+
+        public static IntPtr Allocate(IntPtr process, uint size) {
+            return Kernel32.VirtualAllocEx(process, IntPtr.Zero, size, Kernel32.AllocationType.COMMIT, Kernel32.Protection.PAGE_EXECUTE_READWRITE);
         }
     }
 }

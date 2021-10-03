@@ -88,6 +88,8 @@ namespace DFXR3Editor
 
         //FFX Workshop Tools
 
+        //Reload memes
+        private static IDictionary<int, IntPtr> _tablePointers = new Dictionary<int, IntPtr>();
 
         [STAThread]
         static void Main()
@@ -167,6 +169,7 @@ namespace DFXR3Editor
                 openFFXs.Add(selectedFFXWindow);
             }
         }
+
         public static void SubmitMainMenuBar()
         {
             if (ImGui.BeginMainMenuBar())
@@ -339,11 +342,24 @@ namespace DFXR3Editor
                     {
                         var id = selectedFFXWindow.loadTimeFxr3.ID;
                         var process = FFXReloader.GetGameHandle();
-                        var fxrPointer = FFXReloader.FindBasePointer(process, id);
+
+                        if (!_tablePointers.ContainsKey(id)) {
+                            var fxrPointer = FFXReloader.FindBasePointer(process, id);
+                            var fxrTablePointer = FFXReloader.FindTablePointer(process, fxrPointer);
+                            _tablePointers.Add(id, fxrTablePointer);
+                        }
+
+                        // Determine the size required for the allocation
+                        var mockContent = FXR3_XMLR.FXR3EnhancedSerialization.XMLToFXR3(selectedFFXWindow.xDocLinq)
+                            .Write();
+                        var allocatedPtr = FFXReloader.Allocate(process.Handle, (uint) mockContent.Length);
 
                         var newContent = FXR3_XMLR.FXR3EnhancedSerialization.XMLToFXR3(selectedFFXWindow.xDocLinq)
-                            .Write(fxrPointer.ToInt64());
-                        FFXReloader.Reload(process, fxrPointer, selectedFFXWindow.currentMemoryVersion, newContent);
+                            .Write(allocatedPtr.ToInt64());
+                        FFXReloader.WriteBytes(process.Handle, allocatedPtr, newContent);
+
+                        FFXReloader.SwapPointers(process.Handle, _tablePointers[id], allocatedPtr);
+
                         selectedFFXWindow.currentMemoryVersion = newContent;
                     }
                     ImGui.EndMenu();

@@ -337,9 +337,14 @@ namespace DFXR3Editor
                 {
                     if (ImGui.MenuItem("Experimental Meme Reload Lol", selectedFFXWindow != null))
                     {
+                        var filePath = selectedFFXWindow._loadedFilePath;
+                        var id = Int32.Parse(Path.GetFileNameWithoutExtension(filePath).TrimStart('f'));
+                        var process = FFXReloader.GetGameHandle();
+                        var fxrPointer = FFXReloader.FindBasePointer(process, id);
+
                         var newContent = FXR3_XMLR.FXR3EnhancedSerialization.XMLToFXR3(selectedFFXWindow.xDocLinq)
                             .Write();
-                        FFXReloader.Reload(selectedFFXWindow.currentMemoryVersion, newContent);
+                        FFXReloader.Reload(process, fxrPointer, selectedFFXWindow.currentMemoryVersion, newContent);
                         selectedFFXWindow.currentMemoryVersion = newContent;
                     }
                     ImGui.EndMenu();

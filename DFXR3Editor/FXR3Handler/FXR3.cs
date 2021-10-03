@@ -99,6 +99,11 @@ namespace FXR3_XMLR
 
         protected override void Write(BinaryWriterEx bw)
         {
+            Write(bw, 0);
+        }
+
+        protected override void Write(BinaryWriterEx bw, long basePointer)
+        {
             bw.WriteASCII("FXR\0");
             bw.WriteInt16((short)0);
             bw.WriteUInt16((ushort)this.Version);
@@ -143,72 +148,72 @@ namespace FXR3_XMLR
             this.RootStateMachine.Write(bw);
             bw.Pad(16);
             bw.FillInt32("Section2Offset", (int)bw.Position);
-            this.RootStateMachine.WriteSection2s(bw);
+            this.RootStateMachine.WriteSection2s(bw, basePointer);
             bw.Pad(16);
             bw.FillInt32("Section3Offset", (int)bw.Position);
             List<FXR3.FFXState> states = this.RootStateMachine.States;
             List<FXR3.FFXTransition> section3s = new List<FXR3.FFXTransition>();
             for (int index = 0; index < states.Count; ++index)
-                states[index].WriteSection3s(bw, index, section3s);
+                states[index].WriteSection3s(bw, index, section3s, basePointer);
             bw.FillInt32("Section3Count", section3s.Count);
             bw.Pad(16);
             bw.FillInt32("Section4Offset", (int)bw.Position);
             List<FXR3.FFXEffectCallA> section4s = new List<FXR3.FFXEffectCallA>();
             this.RootEffectCall.Write(bw, section4s);
-            this.RootEffectCall.WriteSection4s(bw, section4s);
+            this.RootEffectCall.WriteSection4s(bw, section4s, basePointer);
             bw.FillInt32("Section4Count", section4s.Count);
             bw.Pad(16);
             bw.FillInt32("Section5Offset", (int)bw.Position);
             int section5Count = 0;
             for (int index = 0; index < section4s.Count; ++index)
-                section4s[index].WriteSection5s(bw, index, ref section5Count);
+                section4s[index].WriteSection5s(bw, index, ref section5Count, basePointer);
             bw.FillInt32("Section5Count", section5Count);
             bw.Pad(16);
             bw.FillInt32("Section6Offset", (int)bw.Position);
             section5Count = 0;
             List<FXR3.FFXActionCall> section6s = new List<FXR3.FFXActionCall>();
             for (int index = 0; index < section4s.Count; ++index)
-                section4s[index].WriteSection6s(bw, index, ref section5Count, section6s);
+                section4s[index].WriteSection6s(bw, index, ref section5Count, section6s, basePointer);
             bw.FillInt32("Section6Count", section6s.Count);
             bw.Pad(16);
             bw.FillInt32("Section7Offset", (int)bw.Position);
             List<FXR3.FFXProperty> section7s = new List<FXR3.FFXProperty>();
             for (int index = 0; index < section6s.Count; ++index)
-                section6s[index].WriteSection7s(bw, index, section7s);
+                section6s[index].WriteSection7s(bw, index, section7s, basePointer);
             bw.FillInt32("Section7Count", section7s.Count);
             bw.Pad(16);
             bw.FillInt32("Section8Offset", (int)bw.Position);
             List<FXR3.Section8> section8s = new List<FXR3.Section8>();
             for (int index = 0; index < section7s.Count; ++index)
-                section7s[index].WriteSection8s(bw, index, section8s);
+                section7s[index].WriteSection8s(bw, index, section8s, basePointer);
             bw.FillInt32("Section8Count", section8s.Count);
             bw.Pad(16);
             bw.FillInt32("Section9Offset", (int)bw.Position);
             List<FXR3.Section9> section9s = new List<FXR3.Section9>();
             for (int index = 0; index < section8s.Count; ++index)
-                section8s[index].WriteSection9s(bw, index, section9s);
+                section8s[index].WriteSection9s(bw, index, section9s, basePointer);
             bw.FillInt32("Section9Count", section9s.Count);
             bw.Pad(16);
             bw.FillInt32("Section10Offset", (int)bw.Position);
             List<FXR3.Section10> section10s = new List<FXR3.Section10>();
             for (int index = 0; index < section6s.Count; ++index)
-                section6s[index].WriteSection10s(bw, index, section10s);
+                section6s[index].WriteSection10s(bw, index, section10s, basePointer);
             bw.FillInt32("Section10Count", section10s.Count);
             bw.Pad(16);
             bw.FillInt32("Section11Offset", (int)bw.Position);
             int section11Count = 0;
             for (int index = 0; index < section3s.Count; ++index)
-                section3s[index].WriteSection11s(bw, index, ref section11Count);
+                section3s[index].WriteSection11s(bw, index, ref section11Count, basePointer);
             for (int index = 0; index < section6s.Count; ++index)
-                section6s[index].WriteSection11s(bw, index, ref section11Count);
+                section6s[index].WriteSection11s(bw, index, ref section11Count, basePointer);
             for (int index = 0; index < section7s.Count; ++index)
-                section7s[index].WriteSection11s(bw, index, ref section11Count);
+                section7s[index].WriteSection11s(bw, index, ref section11Count, basePointer);
             for (int index = 0; index < section8s.Count; ++index)
-                section8s[index].WriteSection11s(bw, index, ref section11Count);
+                section8s[index].WriteSection11s(bw, index, ref section11Count, basePointer);
             for (int index = 0; index < section9s.Count; ++index)
-                section9s[index].WriteSection11s(bw, index, ref section11Count);
+                section9s[index].WriteSection11s(bw, index, ref section11Count, basePointer);
             for (int index = 0; index < section10s.Count; ++index)
-                section10s[index].WriteSection11s(bw, index, ref section11Count);
+                section10s[index].WriteSection11s(bw, index, ref section11Count, basePointer);
             bw.FillInt32("Section11Count", section11Count);
             bw.Pad(16);
             if (this.Version != FXR3.FXRVersion.Sekiro)
@@ -251,13 +256,12 @@ namespace FXR3_XMLR
             {
                 bw.WriteInt32(0);
                 bw.WriteInt32(this.States.Count);
-                bw.ReserveInt32("Section1Section2sOffset");
-                bw.WriteInt32(0);
+                bw.ReserveInt64("Section1Section2sOffset");
             }
 
-            internal void WriteSection2s(BinaryWriterEx bw)
+            internal void WriteSection2s(BinaryWriterEx bw, long basePointer)
             {
-                bw.FillInt32("Section1Section2sOffset", (int)bw.Position);
+                bw.FillInt64("Section1Section2sOffset", (int)bw.Position + basePointer);
                 for (int index = 0; index < this.States.Count; ++index)
                     this.States[index].Write(bw, index);
             }
@@ -286,16 +290,16 @@ namespace FXR3_XMLR
             {
                 bw.WriteInt32(0);
                 bw.WriteInt32(this.Transitions.Count);
-                bw.ReserveInt32(string.Format("Section2Section3sOffset[{0}]", (object)index));
-                bw.WriteInt32(0);
+                bw.ReserveInt64(string.Format("Section2Section3sOffset[{0}]", (object)index));
             }
 
             internal void WriteSection3s(
               BinaryWriterEx bw,
               int index,
-              List<FXR3.FFXTransition> section3s)
+              List<FXR3.FFXTransition> section3s,
+              long basePointer)
             {
-                bw.FillInt32(string.Format("Section2Section3sOffset[{0}]", (object)index), (int)bw.Position);
+                bw.FillInt64(string.Format("Section2Section3sOffset[{0}]", (object)index), (int)bw.Position + basePointer);
                 foreach (FXR3.FFXTransition transition in this.Transitions)
                     transition.Write(bw, section3s);
             }
@@ -363,8 +367,7 @@ namespace FXR3_XMLR
                 bw.WriteInt32(0);
                 bw.WriteInt32(1);
                 bw.WriteInt32(0);
-                bw.ReserveInt32(string.Format("Section3Section11Offset1[{0}]", (object)count));
-                bw.WriteInt32(0);
+                bw.ReserveInt64(string.Format("Section3Section11Offset1[{0}]", (object)count));
                 bw.WriteInt32(0);
                 bw.WriteInt32(0);
                 bw.WriteInt32(0);
@@ -373,8 +376,7 @@ namespace FXR3_XMLR
                 bw.WriteInt32(0);
                 bw.WriteInt32(1);
                 bw.WriteInt32(0);
-                bw.ReserveInt32(string.Format("Section3Section11Offset2[{0}]", (object)count));
-                bw.WriteInt32(0);
+                bw.ReserveInt64(string.Format("Section3Section11Offset2[{0}]", (object)count));
                 bw.WriteInt32(0);
                 bw.WriteInt32(0);
                 bw.WriteInt32(0);
@@ -382,11 +384,11 @@ namespace FXR3_XMLR
                 section3s.Add(this);
             }
 
-            internal void WriteSection11s(BinaryWriterEx bw, int index, ref int section11Count)
+            internal void WriteSection11s(BinaryWriterEx bw, int index, ref int section11Count, long basePointer)
             {
-                bw.FillInt32(string.Format("Section3Section11Offset1[{0}]", (object)index), (int)bw.Position);
+                bw.FillInt64(string.Format("Section3Section11Offset1[{0}]", (object)index), (int)bw.Position + basePointer);
                 bw.WriteInt32(this.Section11Data1);
-                bw.FillInt32(string.Format("Section3Section11Offset2[{0}]", (object)index), (int)bw.Position);
+                bw.FillInt64(string.Format("Section3Section11Offset2[{0}]", (object)index), (int)bw.Position + basePointer);
                 bw.WriteInt32(this.Section11Data2);
                 section11Count += 2;
             }
@@ -454,41 +456,38 @@ namespace FXR3_XMLR
                 bw.WriteInt32(this.Actions.Count);
                 bw.WriteInt32(this.EffectAs.Count);
                 bw.WriteInt32(0);
-                bw.ReserveInt32(string.Format("Section4Section5sOffset[{0}]", (object)count));
-                bw.WriteInt32(0);
-                bw.ReserveInt32(string.Format("Section4Section6sOffset[{0}]", (object)count));
-                bw.WriteInt32(0);
-                bw.ReserveInt32(string.Format("Section4Section4sOffset[{0}]", (object)count));
-                bw.WriteInt32(0);
+                bw.ReserveInt64(string.Format("Section4Section5sOffset[{0}]", (object)count));
+                bw.ReserveInt64(string.Format("Section4Section6sOffset[{0}]", (object)count));
+                bw.ReserveInt64(string.Format("Section4Section4sOffset[{0}]", (object)count));
                 section4s.Add(this);
             }
 
-            internal void WriteSection4s(BinaryWriterEx bw, List<FXR3.FFXEffectCallA> section4s)
+            internal void WriteSection4s(BinaryWriterEx bw, List<FXR3.FFXEffectCallA> section4s, long basePointer)
             {
                 int num = section4s.IndexOf(this);
                 if (this.EffectAs.Count == 0)
                 {
-                    bw.FillInt32(string.Format("Section4Section4sOffset[{0}]", (object)num), 0);
+                    bw.FillInt64(string.Format("Section4Section4sOffset[{0}]", (object)num), 0);
                 }
                 else
                 {
-                    bw.FillInt32(string.Format("Section4Section4sOffset[{0}]", (object)num), (int)bw.Position);
+                    bw.FillInt64(string.Format("Section4Section4sOffset[{0}]", (object)num), (int)bw.Position + basePointer);
                     foreach (FXR3.FFXEffectCallA effectA in this.EffectAs)
                         effectA.Write(bw, section4s);
                     foreach (FXR3.FFXEffectCallA effectA in this.EffectAs)
-                        effectA.WriteSection4s(bw, section4s);
+                        effectA.WriteSection4s(bw, section4s, basePointer);
                 }
             }
 
-            internal void WriteSection5s(BinaryWriterEx bw, int index, ref int section5Count)
+            internal void WriteSection5s(BinaryWriterEx bw, int index, ref int section5Count, long basePointer)
             {
                 if (this.EffectBs.Count == 0)
                 {
-                    bw.FillInt32(string.Format("Section4Section5sOffset[{0}]", (object)index), 0);
+                    bw.FillInt64(string.Format("Section4Section5sOffset[{0}]", (object)index), 0);
                 }
                 else
                 {
-                    bw.FillInt32(string.Format("Section4Section5sOffset[{0}]", (object)index), (int)bw.Position);
+                    bw.FillInt64(string.Format("Section4Section5sOffset[{0}]", (object)index), (int)bw.Position + basePointer);
                     for (int index1 = 0; index1 < this.EffectBs.Count; ++index1)
                         this.EffectBs[index1].Write(bw, section5Count + index1);
                     section5Count += this.EffectBs.Count;
@@ -499,13 +498,14 @@ namespace FXR3_XMLR
               BinaryWriterEx bw,
               int index,
               ref int section5Count,
-              List<FXR3.FFXActionCall> section6s)
+              List<FXR3.FFXActionCall> section6s,
+              long basePointer)
             {
-                bw.FillInt32(string.Format("Section4Section6sOffset[{0}]", (object)index), (int)bw.Position);
+                bw.FillInt64(string.Format("Section4Section6sOffset[{0}]", (object)index), (int)bw.Position + basePointer);
                 foreach (FXR3.FFXActionCall action in this.Actions)
                     action.Write(bw, section6s);
                 for (int index1 = 0; index1 < this.EffectBs.Count; ++index1)
-                    this.EffectBs[index1].WriteSection6s(bw, section5Count + index1, section6s);
+                    this.EffectBs[index1].WriteSection6s(bw, section5Count + index1, section6s, basePointer);
                 section5Count += this.EffectBs.Count;
             }
         }
@@ -548,16 +548,16 @@ namespace FXR3_XMLR
                 bw.WriteInt32(this.Actions.Count);
                 bw.WriteInt32(0);
                 bw.WriteInt32(0);
-                bw.ReserveInt32(string.Format("Section5Section6sOffset[{0}]", (object)index));
-                bw.WriteInt32(0);
+                bw.ReserveInt64(string.Format("Section5Section6sOffset[{0}]", (object)index));
             }
 
             internal void WriteSection6s(
               BinaryWriterEx bw,
               int index,
-              List<FXR3.FFXActionCall> section6s)
+              List<FXR3.FFXActionCall> section6s,
+              long basePointer)
             {
-                bw.FillInt32(string.Format("Section5Section6sOffset[{0}]", (object)index), (int)bw.Position);
+                bw.FillInt64(string.Format("Section5Section6sOffset[{0}]", (object)index), bw.Position + basePointer);
                 foreach (FXR3.FFXActionCall action in this.Actions)
                     action.Write(bw, section6s);
             }
@@ -645,42 +645,39 @@ namespace FXR3_XMLR
                 bw.WriteInt32(this.Fields2.Count);
                 bw.WriteInt32(0);
                 bw.WriteInt32(this.Properties2.Count);
-                bw.ReserveInt32(string.Format("Section6Section11sOffset[{0}]", (object)count));
-                bw.WriteInt32(0);
-                bw.ReserveInt32(string.Format("Section6Section10sOffset[{0}]", (object)count));
-                bw.WriteInt32(0);
-                bw.ReserveInt32(string.Format("Section6Section7sOffset[{0}]", (object)count));
-                bw.WriteInt32(0);
+                bw.ReserveInt64(string.Format("Section6Section11sOffset[{0}]", (object)count));
+                bw.ReserveInt64(string.Format("Section6Section10sOffset[{0}]", (object)count));
+                bw.ReserveInt64(string.Format("Section6Section7sOffset[{0}]", (object)count));
                 bw.WriteInt32(0);
                 bw.WriteInt32(0);
                 section6s.Add(this);
             }
 
-            internal void WriteSection7s(BinaryWriterEx bw, int index, List<FXR3.FFXProperty> section7s)
+            internal void WriteSection7s(BinaryWriterEx bw, int index, List<FXR3.FFXProperty> section7s, long basePointer)
             {
-                bw.FillInt32(string.Format("Section6Section7sOffset[{0}]", (object)index), (int)bw.Position);
+                bw.FillInt64(string.Format("Section6Section7sOffset[{0}]", (object)index), (int)bw.Position + basePointer);
                 foreach (FXR3.FFXProperty ffxProperty in this.Properties1)
                     ffxProperty.Write(bw, section7s);
                 foreach (FXR3.FFXProperty ffxProperty in this.Properties2)
                     ffxProperty.Write(bw, section7s);
             }
 
-            internal void WriteSection10s(BinaryWriterEx bw, int index, List<FXR3.Section10> section10s)
+            internal void WriteSection10s(BinaryWriterEx bw, int index, List<FXR3.Section10> section10s, long basePointer)
             {
-                bw.FillInt32(string.Format("Section6Section10sOffset[{0}]", (object)index), (int)bw.Position);
+                bw.FillInt64(string.Format("Section6Section10sOffset[{0}]", (object)index), (int)bw.Position + basePointer);
                 foreach (FXR3.Section10 section10 in this.Section10s)
                     section10.Write(bw, section10s);
             }
 
-            internal void WriteSection11s(BinaryWriterEx bw, int index, ref int section11Count)
+            internal void WriteSection11s(BinaryWriterEx bw, int index, ref int section11Count, long basePointer)
             {
                 if (this.Fields1.Count == 0 && this.Fields2.Count == 0)
                 {
-                    bw.FillInt32(string.Format("Section6Section11sOffset[{0}]", (object)index), 0);
+                    bw.FillInt64(string.Format("Section6Section11sOffset[{0}]", (object)index), 0);
                 }
                 else
                 {
-                    bw.FillInt32(string.Format("Section6Section11sOffset[{0}]", (object)index), (int)bw.Position);
+                    bw.FillInt64(string.Format("Section6Section11sOffset[{0}]", (object)index), (int)bw.Position + basePointer);
                     foreach (FXR3.FFXField ffxField in this.Fields1)
                         ffxField.Write(bw);
                     foreach (FXR3.FFXField ffxField in this.Fields2)
@@ -800,31 +797,29 @@ namespace FXR3_XMLR
                 bw.WriteInt32(this.TypeEnumB);
                 bw.WriteInt32(this.Fields.Count);
                 bw.WriteInt32(0);
-                bw.ReserveInt32(string.Format("Section7Section11sOffset[{0}]", (object)count));
-                bw.WriteInt32(0);
-                bw.ReserveInt32(string.Format("Section7Section8sOffset[{0}]", (object)count));
-                bw.WriteInt32(0);
+                bw.ReserveInt64(string.Format("Section7Section11sOffset[{0}]", (object)count));
+                bw.ReserveInt64(string.Format("Section7Section8sOffset[{0}]", (object)count));
                 bw.WriteInt32(this.Section8s.Count);
                 bw.WriteInt32(0);
                 section7s.Add(this);
             }
 
-            internal void WriteSection8s(BinaryWriterEx bw, int index, List<FXR3.Section8> section8s)
+            internal void WriteSection8s(BinaryWriterEx bw, int index, List<FXR3.Section8> section8s, long basePointer)
             {
-                bw.FillInt32(string.Format("Section7Section8sOffset[{0}]", (object)index), (int)bw.Position);
+                bw.FillInt64(string.Format("Section7Section8sOffset[{0}]", (object)index), (int)bw.Position + basePointer);
                 foreach (FXR3.Section8 section8 in this.Section8s)
                     section8.Write(bw, section8s);
             }
 
-            internal void WriteSection11s(BinaryWriterEx bw, int index, ref int section11Count)
+            internal void WriteSection11s(BinaryWriterEx bw, int index, ref int section11Count, long basePointer)
             {
                 if (this.Fields.Count == 0)
                 {
-                    bw.FillInt32(string.Format("Section7Section11sOffset[{0}]", (object)index), 0);
+                    bw.FillInt64(string.Format("Section7Section11sOffset[{0}]", (object)index), 0);
                 }
                 else
                 {
-                    bw.FillInt32(string.Format("Section7Section11sOffset[{0}]", (object)index), (int)bw.Position);
+                    bw.FillInt64(string.Format("Section7Section11sOffset[{0}]", (object)index), bw.Position + basePointer);
                     foreach (FXR3.FFXField field in this.Fields)
                         field.Write(bw);
                     section11Count += this.Fields.Count;
@@ -878,23 +873,21 @@ namespace FXR3_XMLR
                 bw.WriteInt32(this.Unk04);
                 bw.WriteInt32(this.Fields.Count);
                 bw.WriteInt32(this.Section9s.Count);
-                bw.ReserveInt32(string.Format("Section8Section11sOffset[{0}]", (object)count));
-                bw.WriteInt32(0);
-                bw.ReserveInt32(string.Format("Section8Section9sOffset[{0}]", (object)count));
-                bw.WriteInt32(0);
+                bw.ReserveInt64(string.Format("Section8Section11sOffset[{0}]", (object)count));
+                bw.ReserveInt64(string.Format("Section8Section9sOffset[{0}]", (object)count));
                 section8s.Add(this);
             }
 
-            internal void WriteSection9s(BinaryWriterEx bw, int index, List<FXR3.Section9> section9s)
+            internal void WriteSection9s(BinaryWriterEx bw, int index, List<FXR3.Section9> section9s, long basePointer)
             {
-                bw.FillInt32(string.Format("Section8Section9sOffset[{0}]", (object)index), (int)bw.Position);
+                bw.FillInt64(string.Format("Section8Section9sOffset[{0}]", (object)index), bw.Position + basePointer);
                 foreach (FXR3.Section9 section9 in this.Section9s)
                     section9.Write(bw, section9s);
             }
 
-            internal void WriteSection11s(BinaryWriterEx bw, int index, ref int section11Count)
+            internal void WriteSection11s(BinaryWriterEx bw, int index, ref int section11Count, long basePointer)
             {
-                bw.FillInt32(string.Format("Section8Section11sOffset[{0}]", (object)index), (int)bw.Position);
+                bw.FillInt64(string.Format("Section8Section11sOffset[{0}]", (object)index), bw.Position + basePointer);
                 foreach (FXR3.FFXField field in this.Fields)
                     field.Write(bw);
                 section11Count += this.Fields.Count;
@@ -931,14 +924,13 @@ namespace FXR3_XMLR
                 bw.WriteInt32(this.Unk04);
                 bw.WriteInt32(this.Fields.Count);
                 bw.WriteInt32(0);
-                bw.ReserveInt32(string.Format("Section9Section11sOffset[{0}]", (object)count));
-                bw.WriteInt32(0);
+                bw.ReserveInt64(string.Format("Section9Section11sOffset[{0}]", (object)count));
                 section9s.Add(this);
             }
 
-            internal void WriteSection11s(BinaryWriterEx bw, int index, ref int section11Count)
+            internal void WriteSection11s(BinaryWriterEx bw, int index, ref int section11Count, long basePointer)
             {
-                bw.FillInt32(string.Format("Section9Section11sOffset[{0}]", (object)index), (int)bw.Position);
+                bw.FillInt64(string.Format("Section9Section11sOffset[{0}]", (object)index), bw.Position + basePointer);
                 foreach (FXR3.FFXField field in this.Fields)
                     field.Write(bw);
                 section11Count += this.Fields.Count;
@@ -963,16 +955,15 @@ namespace FXR3_XMLR
             internal void Write(BinaryWriterEx bw, List<FXR3.Section10> section10s)
             {
                 int count = section10s.Count;
-                bw.ReserveInt32(string.Format("Section10Section11sOffset[{0}]", (object)count));
-                bw.WriteInt32(0);
+                bw.ReserveInt64(string.Format("Section10Section11sOffset[{0}]", (object)count));
                 bw.WriteInt32(this.Fields.Count);
                 bw.WriteInt32(0);
                 section10s.Add(this);
             }
 
-            internal void WriteSection11s(BinaryWriterEx bw, int index, ref int section11Count)
+            internal void WriteSection11s(BinaryWriterEx bw, int index, ref int section11Count, long basePointer)
             {
-                bw.FillInt32(string.Format("Section10Section11sOffset[{0}]", (object)index), (int)bw.Position);
+                bw.FillInt64(string.Format("Section10Section11sOffset[{0}]", (object)index), bw.Position + basePointer);
                 foreach (FXR3.FFXField field in this.Fields)
                     field.Write(bw);
                 section11Count += this.Fields.Count;

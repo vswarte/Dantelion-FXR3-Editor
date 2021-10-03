@@ -38,28 +38,19 @@ namespace FFXPatchTest {
                 throw new NotImplementedException("Bad human! No changing file sizes!");
             }
 
-            await debugDumpFxr(process.Handle, ffxPtr);
+            await File.WriteAllBytesAsync("in-memory.fxr", debugDumpFxr(process.Handle, ffxPtr));
+            await File.WriteAllBytesAsync("patched.fxr", patchedFxr);
 
-            // Find the reference to this in-memory FXR file
-            // var pointerBytes = BitConverter.GetBytes(ffxPtr.ToInt64());
-            // var tableScanner = new MemoryScanner(process, new IntPtr(0x7FF433000000), 0xfffffff);
-            // var ffxTablePointer = ffxScanner.FindPattern(pointerBytes, "xxxxxxxx");
-
-            var diffSet = Differ.CreateDiffSet(originalFxr, patchedFxr);
-            foreach (var diff in diffSet) {
-                var offsettedPointer = ffxPtr + (int) diff.Offset;
-                writeBytes(process.Handle, offsettedPointer, diff.Bytes);
-            }
+            writeBytes(process.Handle, ffxPtr, patchedFxr);
         }
 
-        private static async Task debugDumpFxr(IntPtr process, IntPtr ffxPtr) {
+        private static byte[] debugDumpFxr(IntPtr process, IntPtr ffxPtr) {
             // Grab the end of the in-memory FFX file
             // In memory, the 8 bytes preceeding the actual FXR seems to indicate the end of the FXR file
             var ffxEndPtr = readPointer(process, ffxPtr - 8);
             var inMemoryFxrLength = (long) ffxEndPtr - (long) ffxPtr;
             var memoryFxrContents = readBytes(process, ffxPtr, inMemoryFxrLength);
-            var inMemoryId = BitConverter.ToInt32(readBytes(process, ffxPtr + 0xC, inMemoryFxrLength));
-            await File.WriteAllBytesAsync($"{inMemoryId}-in-memory-dump.fxr", memoryFxrContents);
+            return memoryFxrContents;
         }
 
         private static IntPtr readPointer(IntPtr process, IntPtr ptr) {
